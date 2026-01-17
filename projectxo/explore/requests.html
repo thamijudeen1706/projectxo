@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProjectXO - Find Hackathon Teams & Exchange Skills</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="icon" type="image/png" href="/assets/logo.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+
+  <meta name="description" content="ProjectXO helps students team up for hackathons, projects and events.">
+  <meta name="keywords" content="hackathon, teammates, skills exchange, student collaboration, ProjectXO">
+  <meta name="author" content="Thamijudeen M, Nanditha S">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:title" content="ProjectXO – Team up for hackathons & projects">
+  <meta property="og:description" content="Find teammates, exchange skills, collaborate on events — Built by students for students.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://iili.io/fUxLsgp.md.png">
+  <meta property="og:site_name" content="ProjectXO">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ProjectXO – Team up for hackathons & projects">
+  <meta name="twitter:description" content="Find teammates, exchange skills, collaborate on events.">
+  <meta name="twitter:image" content="https://iili.io/fUxLsgp.md.png">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #2a9d8f;
+            --danger: #e63946;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            width: 250px;
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            margin: 5px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .request-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s;
+        }
+        
+        .request-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .request-card.pending {
+            border-left-color: var(--primary);
+            background: linear-gradient(90deg, rgba(67, 97, 238, 0.05) 0%, white 5%);
+        }
+        
+        .request-card.accepted {
+            border-left-color: var(--success);
+            background: linear-gradient(90deg, rgba(42, 157, 143, 0.05) 0%, white 5%);
+        }
+        
+        .request-card.rejected {
+            border-left-color: var(--danger);
+            background: linear-gradient(90deg, rgba(230, 57, 70, 0.05) 0%, white 5%);
+        }
+        
+        .user-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary) 0%, #4cc9f0 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .badge-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .badge-pending {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+        
+        .badge-accepted {
+            background: rgba(42, 157, 143, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-rejected {
+            background: rgba(230, 57, 70, 0.1);
+            color: var(--danger);
+        }
+        
+        .message-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 3px solid var(--primary);
+            font-style: italic;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .sidebar.active {
+                margin-left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="p-4">
+            <!-- Logo -->
+            <div class="d-flex align-items-center mb-5">
+                <i class="fas fa-users fa-2x me-2"></i>
+                <h4 class="fw-bold mb-0">ProjectXO</h4>
+            </div>
+            
+            <!-- User Info -->
+            <div class="text-center mb-4">
+                <div class="position-relative d-inline-block mb-3">
+                    <div class="user-avatar mx-auto" id="userAvatarSidebar">
+                        <!-- Avatar will be set by JS -->
+                    </div>
+                </div>
+                <h5 id="userNameSidebar">User</h5>
+                <small class="text-white-50" id="userCollegeSidebar">College • Dept</small>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="nav flex-column">
+                <a href="../dashboard.html" class="nav-link">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="../profile/edit.html" class="nav-link">
+                    <i class="fas fa-user-edit"></i> My Profile
+                </a>
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-search"></i> Find Students
+                </a>
+                <a href="requests.html" class="nav-link active">
+                    <i class="fas fa-handshake"></i> Requests
+                    <span class="badge bg-danger rounded-pill ms-1" id="requestsBadge"></span>
+                </a>
+                <a href="../chat/index.html" class="nav-link">
+                    <i class="fas fa-comments"></i> Messages
+                </a>
+                <a href="../events/index.html" class="nav-link">
+                    <i class="fas fa-calendar-alt"></i> Free Hackathons
+                </a>
+            </nav>
+            
+            <!-- Logout -->
+            <div class="mt-5 pt-4 border-top border-white-10">
+                <button class="btn btn-outline-light w-100" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Connection Requests</h2>
+                <p class="text-muted mb-0">Manage your incoming and outgoing requests</p>
+            </div>
+            <div class="d-flex gap-3">
+                <!-- Tabs -->
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary active" onclick="showTab('incoming')">
+                        Incoming
+                        <span class="badge bg-primary ms-1" id="incomingCount">0</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="showTab('sent')">
+                        Sent
+                        <span class="badge bg-secondary ms-1" id="sentCount">0</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="showTab('accepted')">
+                        Accepted
+                        <span class="badge bg-success ms-1" id="acceptedCount">0</span>
+                    </button>
+                </div>
+                
+                <!-- Mobile Menu Toggle -->
+                <button class="btn btn-outline-primary d-md-none" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 bg-primary bg-opacity-10">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-inbox"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0" id="statsPending">0</h3>
+                                <p class="text-muted mb-0">Pending Requests</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 bg-success bg-opacity-10">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0" id="statsAccepted">0</h3>
+                                <p class="text-muted mb-0">Accepted</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 bg-danger bg-opacity-10">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-user-friends"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0" id="statsConnections">0</h3>
+                                <p class="text-muted mb-0">Total Connections</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Content -->
+        <div id="incomingTab">
+            <h4 class="fw-bold mb-3">Incoming Requests</h4>
+            <div id="incomingRequests">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Loading incoming requests...</p>
+                </div>
+            </div>
+            
+            <div id="noIncoming" class="empty-state" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <h4>No incoming requests</h4>
+                <p class="text-muted">When someone sends you a connection request, it will appear here.</p>
+                <a href="index.html" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>Find Students to Connect
+                </a>
+            </div>
+        </div>
+
+        <div id="sentTab" style="display: none;">
+            <h4 class="fw-bold mb-3">Sent Requests</h4>
+            <div id="sentRequests">
+                <!-- Sent requests will be loaded here -->
+            </div>
+            
+            <div id="noSent" class="empty-state" style="display: none;">
+                <i class="fas fa-paper-plane"></i>
+                <h4>No sent requests</h4>
+                <p class="text-muted">You haven't sent any connection requests yet.</p>
+                <a href="index.html" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Send Connection Requests
+                </a>
+            </div>
+        </div>
+
+        <div id="acceptedTab" style="display: none;">
+            <h4 class="fw-bold mb-3">Accepted Connections</h4>
+            <div id="acceptedConnections">
+                <!-- Accepted connections will be loaded here -->
+            </div>
+            
+            <div id="noAccepted" class="empty-state" style="display: none;">
+                <i class="fas fa-users"></i>
+                <h4>No connections yet</h4>
+                <p class="text-muted">When you accept a connection request, they will appear here.</p>
+                <a href="index.html" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>Find Students to Connect
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="module">
+        console.log('🚀 Requests page loading...');
+        
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { 
+            getFirestore, collection, getDocs, query, where, 
+            updateDoc, doc, getDoc, onSnapshot, orderBy 
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxv3yZ5Ex_JavuAxOEe0DoaDwH1YIx62w",
+            authDomain: "projectxo-17061130.firebaseapp.com",
+            projectId: "projectxo-17061130",
+            storageBucket: "projectxo-17061130.firebasestorage.app",
+            messagingSenderId: "834793800310",
+            appId: "1:834793800310:web:4f29a5df2cdfc148861557"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Global variables
+        let currentUser = null;
+        let currentTab = 'incoming';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('📱 DOM loaded');
+            
+            // Check authentication
+            if (!checkAuth()) return;
+            
+            // Load current user
+            await loadCurrentUser();
+            
+            // Load all requests
+            await loadAllRequests();
+            
+            // Setup real-time listener
+            setupRealtimeListener();
+            
+            // Mobile sidebar toggle
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+            
+            console.log('✅ Requests page initialized');
+        });
+        
+        // Check authentication
+        function checkAuth() {
+            const userId = localStorage.getItem('currentUserId');
+            if (!userId) {
+                window.location.href = '../auth/login.html';
+                return false;
+            }
+            return true;
+        }
+        
+        // Load current user
+        async function loadCurrentUser() {
+            try {
+                const userId = localStorage.getItem('currentUserId');
+                const userDoc = await getDoc(doc(db, "users", userId));
+                
+                if (userDoc.exists()) {
+                    currentUser = userDoc.data();
+                    
+                    // Update sidebar
+                    const initials = (currentUser.fullName || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                    document.getElementById('userAvatarSidebar').textContent = initials;
+                    document.getElementById('userNameSidebar').textContent = currentUser.fullName || 'User';
+                    document.getElementById('userCollegeSidebar').textContent = 
+                        `${currentUser.college || 'College'} • ${currentUser.department || 'Dept'}`;
+                }
+            } catch (error) {
+                console.error('Error loading current user:', error);
+            }
+        }
+        
+        // Load all requests
+        async function loadAllRequests() {
+            try {
+                const userId = localStorage.getItem('currentUserId');
+                
+                // Get incoming requests (pending, to me)
+                const incomingQuery = query(
+                    collection(db, "connections"),
+                    where("to", "==", userId)
+                );
+                const incomingSnapshot = await getDocs(incomingQuery);
+                
+                // Get sent requests (pending, from me)
+                const sentQuery = query(
+                    collection(db, "connections"),
+                    where("from", "==", userId),
+                    where("status", "==", "pending")
+                );
+                const sentSnapshot = await getDocs(sentQuery);
+                
+                // Get accepted connections (either from me or to me)
+                const acceptedQuery = query(
+                    collection(db, "connections"),
+                    where("status", "==", "accepted")
+                );
+                const acceptedSnapshot = await getDocs(acceptedQuery);
+                
+                // Process and display
+                await processRequests(incomingSnapshot, 'incoming');
+                await processRequests(sentSnapshot, 'sent');
+                await processAcceptedConnections(acceptedSnapshot, userId);
+                
+                // Update stats
+                updateStats();
+                
+            } catch (error) {
+                console.error('❌ Error loading requests:', error);
+                showError('Failed to load requests');
+            }
+        }
+        
+        // Process requests
+        async function processRequests(snapshot, type) {
+            const containerId = type === 'incoming' ? 'incomingRequests' : 'sentRequests';
+            const emptyId = type === 'incoming' ? 'noIncoming' : 'noSent';
+            const container = document.getElementById(containerId);
+            const emptyState = document.getElementById(emptyId);
+            
+            if (snapshot.empty) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            container.style.display = 'block';
+            emptyState.style.display = 'none';
+            container.innerHTML = '';
+            
+            // Group by user to avoid duplicates (show only latest)
+            const requestsByUser = new Map();
+
+            
+           // Process each request and keep only the latest one per user
+           snapshot.docs.forEach(requestDoc => {
+            const request = { id: requestDoc.id, ...requestDoc.data() };
+            const userId = type === 'incoming' ? request.from : request.to;
+
+            // Keep only the latest request for each user
+            if (!requestsByUser.has(userId) || request.timestamp?.toDate() > requestsByUser.get(userId).timestamp?.toDate()) {
+                 requestsByUser.set(userId, request);} 
+           });
+           // Now process only the latest request per user
+           for (const [userId, request] of requestsByUser.entries()) {
+            try {
+                const userDoc = await getDoc(doc(db, "users", userId));
+        if (userDoc.exists()) {
+            const user = userDoc.data();
+            const requestCard = createRequestCard(request, user, type);
+            container.appendChild(requestCard);
+
+        }
+            }catch(error){
+                console.error('Error loading user for request:', error);
+            }
+           }
+      }
+
+         // Process accepted connections
+        async function processAcceptedConnections(snapshot, currentUserId) {
+            const container = document.getElementById('acceptedConnections');
+            const emptyState = document.getElementById('noAccepted');
+            
+            const acceptedUsers = [];
+            
+            // Filter connections where current user is involved
+            for (const connectionDoc of snapshot.docs) {
+                const connection = connectionDoc.data();
+                
+                if (connection.from === currentUserId || connection.to === currentUserId) {
+                    const otherUserId = connection.from === currentUserId ? connection.to : connection.from;
+                    acceptedUsers.push(otherUserId);
+                }
+            }
+            
+            // Remove duplicates
+            const uniqueUserIds = [...new Set(acceptedUsers)];
+            
+            if (uniqueUserIds.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            container.style.display = 'block';
+            emptyState.style.display = 'none';
+            container.innerHTML = '';
+            
+            // Load each user
+            for (const userId of uniqueUserIds) {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", userId));
+                    if (userDoc.exists()) {
+                        const user = userDoc.data();
+                        const connectionCard = createConnectionCard(user);
+                        container.appendChild(connectionCard);
+                    }
+                } catch (error) {
+                    console.error('Error loading accepted user:', error);
+                }
+            }
+        }
+        
+        // Create request card
+        function createRequestCard(request, user, type) {
+            const div = document.createElement('div');
+            div.className = `request-card ${request.status || 'pending'}`;
+            
+            const initials = (user.fullName || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            const timeAgo = formatTimeAgo(request.timestamp?.toDate());
+            
+            div.innerHTML = `
+                <div class="row align-items-center">
+                    <!-- User Info -->
+                    <div class="col-md-2 text-center mb-3 mb-md-0">
+                        <div class="user-avatar mx-auto">
+                            ${initials}
+                        </div>
+                    </div>
+                    
+                    <!-- Details -->
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-1">${user.fullName || 'User'}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-graduation-cap me-1"></i>
+                            ${user.college || 'College'} • ${user.department || 'Dept'}
+                        </p>
+                        <div class="mb-2">
+                            ${user.skills && user.skills.length > 0 
+                                ? user.skills.slice(0, 3).map(skill => 
+                                    `<span class="badge bg-light text-dark border me-1">${skill}</span>`
+                                  ).join('')
+                                : '<small class="text-muted">No skills listed</small>'
+                            }
+                        </div>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-clock me-1"></i>${timeAgo}
+                        </p>
+                    </div>
+                    
+                    <!-- Status & Actions -->
+                    <div class="col-md-4 text-end">
+                        ${type === 'incoming' && request.status === 'pending' ? `
+                            <div class="mb-3 message-box">
+                                <small><i class="fas fa-quote-left me-1"></i>${request.message || 'No message'}</small>
+                            </div>
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button class="btn btn-success btn-sm" onclick="handleRequest('${request.id}', 'accept')">
+                                    <i class="fas fa-check me-1"></i>Accept
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="handleRequest('${request.id}', 'reject')">
+                                    <i class="fas fa-times me-1"></i>Reject
+                                </button>
+                            </div>
+                        ` : ''}
+                        
+                        ${type === 'sent' ? `
+                            <span class="badge-status badge-pending">
+                                <i class="fas fa-clock me-1"></i>Pending
+                            </span>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="cancelRequest('${request.id}')">
+                                    <i class="fas fa-trash me-1"></i>Cancel
+                                </button>
+                            </div>
+                        ` : ''}
+                        
+                        ${request.status === 'accepted' ? `
+                            <span class="badge-status badge-accepted">
+                                <i class="fas fa-check-circle me-1"></i>Accepted
+                            </span>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-primary btn-sm" onclick="viewUserProfile('${user.uid || request.from || request.to}')">
+                                    <i class="fas fa-eye me-1"></i>View Profile
+                                </button>
+                            </div>
+                        ` : ''}
+                        
+                        ${request.status === 'rejected' ? `
+                            <span class="badge-status badge-rejected">
+                                <i class="fas fa-times-circle me-1"></i>Rejected
+                            </span>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+        
+        // Create connection card (for accepted tab)
+        function createConnectionCard(user) {
+            const div = document.createElement('div');
+            div.className = 'request-card accepted';
+            
+            const initials = (user.fullName || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            
+            div.innerHTML = `
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center mb-3 mb-md-0">
+                        <div class="user-avatar mx-auto">
+                            ${initials}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-1">${user.fullName || 'User'}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-graduation-cap me-1"></i>
+                            ${user.college || 'College'} • ${user.department || 'Dept'}
+                        </p>
+                        <div class="mb-2">
+                            ${user.skills && user.skills.length > 0 
+                                ? user.skills.slice(0, 3).map(skill => 
+                                    `<span class="badge bg-light text-dark border me-1">${skill}</span>`
+                                  ).join('')
+                                : '<small class="text-muted">No skills listed</small>'
+                            }
+                        </div>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-bullseye me-1"></i>Looking for: ${user.lookingFor || 'Not specified'}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-4 text-end">
+                        <span class="badge-status badge-accepted">
+                            <i class="fas fa-check-circle me-1"></i>Connected
+                        </span>
+                        <div class="mt-2">
+                            <button class="btn btn-primary btn-sm me-2" onclick="startChat('${user.uid}')">
+                                <i class="fas fa-comment me-1"></i>Message
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="viewUserProfile('${user.uid}')">
+                                <i class="fas fa-eye me-1"></i>Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+        
+        // Handle request (accept/reject)
+        window.handleRequest = async function(requestId, action) {
+            try {
+                const status = action === 'accept' ? 'accepted' : 'rejected';
+                
+                await updateDoc(doc(db, "connections", requestId), {
+                    status: status,
+                    respondedAt: new Date()
+                });
+                
+                showNotification(`Request ${action}ed successfully!`);
+                
+                // Reload requests
+                setTimeout(() => {
+                    loadAllRequests();
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error handling request:', error);
+                showError('Failed to process request');
+            }
+        };
+        
+        // Cancel sent request
+        window.cancelRequest = async function(requestId) {
+            if (!confirm('Are you sure you want to cancel this request?')) return;
+            
+            try {
+                await updateDoc(doc(db, "connections", requestId), {
+                    status: 'cancelled'
+                });
+                
+                showNotification('Request cancelled');
+                
+                setTimeout(() => {
+                    loadAllRequests();
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error cancelling request:', error);
+                showError('Failed to cancel request');
+            }
+        };
+        
+        // View user profile
+        window.viewUserProfile = function(userId) {
+            localStorage.setItem('selectedUserId', userId);
+            window.location.href = '../profile/view.html';
+        };
+        
+        // Start chat
+        window.startChat = function(userId) {
+            // Will implement in chat feature
+            showNotification('Chat feature coming soon!');
+        };
+        
+        // Show tab
+        window.showTab = function(tabName) {
+            // Hide all tabs
+            document.getElementById('incomingTab').style.display = 'none';
+            document.getElementById('sentTab').style.display = 'none';
+            document.getElementById('acceptedTab').style.display = 'none';
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.btn-group .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab and activate button
+            document.getElementById(`${tabName}Tab`).style.display = 'block';
+            event.target.classList.add('active');
+            currentTab = tabName;
+        };
+        
+        // Update stats
+        function updateStats() {
+            // Update counts in tabs
+            const incomingCount = document.getElementById('incomingRequests').children.length;
+            const sentCount = document.getElementById('sentRequests').children.length;
+            const acceptedCount = document.getElementById('acceptedConnections').children.length;
+            
+            document.getElementById('incomingCount').textContent = incomingCount;
+            document.getElementById('sentCount').textContent = sentCount;
+            document.getElementById('acceptedCount').textContent = acceptedCount;
+            
+            // Update stats cards
+            document.getElementById('statsPending').textContent = incomingCount;
+            document.getElementById('statsAccepted').textContent = acceptedCount;
+            document.getElementById('statsConnections').textContent = acceptedCount;
+            
+            // Update sidebar badge
+            document.getElementById('requestsBadge').textContent = incomingCount;
+            document.getElementById('requestsBadge').style.display = incomingCount > 0 ? 'inline' : 'none';
+        }
+        
+        // Setup real-time listener
+        function setupRealtimeListener() {
+            const userId = localStorage.getItem('currentUserId');
+            const connectionsRef = collection(db, "connections");
+            
+            onSnapshot(connectionsRef, (snapshot) => {
+                console.log('🔄 Real-time update received');
+                loadAllRequests();
+            });
+        }
+        
+        // Format time ago
+        function formatTimeAgo(date) {
+            if (!date) return 'Recently';
+            
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `${days}d ago`;
+            
+            const weeks = Math.floor(days / 7);
+            if (weeks < 4) return `${weeks}w ago`;
+            
+            return date.toLocaleDateString();
+        }
+        
+        // Show error
+        function showError(message) {
+            const notification = document.createElement('div');
+            notification.className = 'position-fixed bottom-0 end-0 m-3 alert alert-danger alert-dismissible fade show';
+            notification.style.zIndex = '9999';
+            notification.innerHTML = `
+                <i class="fas fa-exclamation-circle me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'position-fixed bottom-0 end-0 m-3 alert alert-success alert-dismissible fade show';
+            notification.style.zIndex = '9999';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Logout
+        window.logout = function() {
+            localStorage.clear();
+            window.location.href = '../auth/login.html';
+        };
+    </script>
+</body>
+</html>

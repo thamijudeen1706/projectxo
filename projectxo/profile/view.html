@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProjectXO - Find Hackathon Teams & Exchange Skills</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="icon" type="image/png" href="/assets/logo.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+
+  <meta name="description" content="ProjectXO helps students team up for hackathons, projects and events.">
+  <meta name="keywords" content="hackathon, teammates, skills exchange, student collaboration, ProjectXO">
+  <meta name="author" content="Thamijudeen M, Nanditha S">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:title" content="ProjectXO – Team up for hackathons & projects">
+  <meta property="og:description" content="Find teammates, exchange skills, collaborate on events — Built by students for students.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://iili.io/fUxLsgp.md.png">
+  <meta property="og:site_name" content="ProjectXO">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ProjectXO – Team up for hackathons & projects">
+  <meta name="twitter:description" content="Find teammates, exchange skills, collaborate on events.">
+  <meta name="twitter:image" content="https://iili.io/fUxLsgp.md.png">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --success: #2a9d8f;
+        }
+        
+        body {
+            background: #f8f9fa;
+            padding-top: 20px;
+            min-height: 100vh;
+        }
+        
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .profile-header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px;
+            position: relative;
+            text-align: center;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, white 0%, #f0f0f0 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0 auto 20px;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .profile-body {
+            padding: 40px;
+        }
+        
+        .section-title {
+            color: var(--primary);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        .info-item {
+            margin-bottom: 20px;
+        }
+        
+        .info-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .skill-badge {
+            background: #e3f2fd;
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 5px;
+            display: inline-block;
+        }
+        
+        .connection-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 5px;
+        }
+        
+        .badge-connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-not-connected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(-3px);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+        
+        .status-online {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-offline {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #ccc;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading profile...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="empty-state" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h4>Profile Not Found</h4>
+            <p class="text-muted">The requested profile could not be loaded.</p>
+            <button class="btn btn-primary" onclick="goBack()">
+                <i class="fas fa-arrow-left me-2"></i>Go Back
+            </button>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="profile-card" id="profileCard" style="display: none;">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <button class="back-button" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                
+                <div class="profile-avatar" id="profileAvatar">
+                    <!-- Avatar initials will be set by JS -->
+                </div>
+                
+                <h2 id="profileName">Loading...</h2>
+                <p class="mb-0" id="profileCollegeDept">College • Department</p>
+                
+                <!-- Connection Status -->
+                <div class="mt-3" id="connectionStatusBadge">
+                    <!-- Will be set by JS -->
+                </div>
+            </div>
+
+            <!-- Profile Body -->
+            <div class="profile-body">
+                <!-- Basic Information -->
+                <div class="mb-5">
+                    <h4 class="section-title">
+                        <i class="fas fa-id-card me-2"></i>Basic Information
+                    </h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">College/University</div>
+                                <div class="info-value" id="infoCollege">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">Department</div>
+                                <div class="info-value" id="infoDepartment">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">Year of Study</div>
+                                <div class="info-value" id="infoYear">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">Experience Level</div>
+                                <div class="info-value" id="infoExperience">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">Looking For</div>
+                                <div class="info-value" id="infoLookingFor">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">Status</div>
+                                <div class="info-value" id="infoStatus">
+                                    <span class="status-offline"></span>Offline
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills -->
+                <div class="mb-5">
+                    <h4 class="section-title">
+                        <i class="fas fa-code me-2"></i>Technical Skills
+                    </h4>
+                    <div id="skillsContainer">
+                        <!-- Skills will be added here -->
+                        <p class="text-muted">No skills listed</p>
+                    </div>
+                </div>
+
+                <!-- Interests -->
+                <div class="mb-5">
+                    <h4 class="section-title">
+                        <i class="fas fa-heart me-2"></i>Interests & Hobbies
+                    </h4>
+                    <p id="interestsText" class="text-muted">No interests listed</p>
+                </div>
+
+                <!-- Contact Information (Only shown if connected) -->
+                <div class="mb-5" id="contactSection" style="display: none;">
+                    <h4 class="section-title">
+                        <i class="fas fa-envelope me-2"></i>Contact Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">Email</div>
+                                <div class="info-value" id="contactEmail">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">Phone</div>
+                                <div class="info-value" id="contactPhone">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons" id="actionButtons">
+                    <!-- Buttons will be added based on connection status -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Modal -->
+        <div class="modal fade" id="connectionModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-user-plus me-2"></i>Send Connection Request
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="connectionMessage" class="form-label">
+                                Add a message (optional):
+                            </label>
+                            <textarea class="form-control" id="connectionMessage" rows="3" 
+                                      placeholder="Hi! I saw your profile and would like to connect..."></textarea>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            They'll see your profile before accepting
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="sendConnectionRequest()">
+                            <i class="fas fa-paper-plane me-1"></i> Send Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="module">
+        // ==================== FIREBASE IMPORTS ====================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { 
+            getFirestore, doc, getDoc, collection, query, where, 
+            getDocs, addDoc, serverTimestamp, updateDoc 
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        // ==================== FIREBASE CONFIG ====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxv3yZ5Ex_JavuAxOEe0DoaDwH1YIx62w",
+            authDomain: "projectxo-17061130.firebaseapp.com",
+            projectId: "projectxo-17061130",
+            storageBucket: "projectxo-17061130.firebasestorage.app",
+            messagingSenderId: "834793800310",
+            appId: "1:834793800310:web:4f29a5df2cdfc148861557"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // ==================== GLOBAL VARIABLES ====================
+        let currentUserId = null;
+        let viewingUserId = null;
+        let userProfile = null;
+        let connectionStatus = null; // 'connected', 'pending', 'not_connected'
+        let connectionModal = null;
+        
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Profile view page loading...');
+            
+            // Initialize modal
+            connectionModal = new bootstrap.Modal(document.getElementById('connectionModal'));
+            
+            // Get user ID from URL or localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            viewingUserId = urlParams.get('userId') || localStorage.getItem('selectedUserId');
+            
+            if (!viewingUserId) {
+                showError('No user specified');
+                return;
+            }
+            
+            // Get current user ID
+            currentUserId = localStorage.getItem('currentUserId');
+            if (!currentUserId) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+            
+            // Don't allow viewing own profile
+            if (viewingUserId === currentUserId) {
+                window.location.href = 'edit.html';
+                return;
+            }
+            
+            // Load the profile
+            await loadUserProfile();
+        });
+        
+        // ==================== LOAD USER PROFILE ====================
+        async function loadUserProfile() {
+            try {
+                console.log('Loading profile for user:', viewingUserId);
+                
+                // Get user document from Firestore
+                const userDoc = await getDoc(doc(db, "users", viewingUserId));
+                
+                if (!userDoc.exists()) {
+                    showError('User profile not found');
+                    return;
+                }
+                
+                userProfile = userDoc.data();
+                console.log('Profile loaded:', userProfile);
+                
+                // Check connection status
+                await checkConnectionStatus();
+                
+                // Update UI with profile data
+                updateProfileUI();
+                
+                // Hide loading, show profile
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('profileCard').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showError('Failed to load profile');
+            }
+        }
+        
+        // ==================== CHECK CONNECTION STATUS ====================
+        async function checkConnectionStatus() {
+            try {
+                // Query connections between current user and viewing user
+                const connectionsQuery = query(
+                    collection(db, "connections"),
+                    where("from", "in", [currentUserId, viewingUserId]),
+                    where("to", "in", [currentUserId, viewingUserId])
+                );
+                
+                const snapshot = await getDocs(connectionsQuery);
+                
+                if (snapshot.empty) {
+                    connectionStatus = 'not_connected';
+                    return;
+                }
+                
+                // Check connection status
+                let foundConnection = null;
+                snapshot.forEach(doc => {
+                    const conn = doc.data();
+                    if ((conn.from === currentUserId && conn.to === viewingUserId) ||
+                        (conn.from === viewingUserId && conn.to === currentUserId)) {
+                        foundConnection = conn;
+                    }
+                });
+                
+                if (!foundConnection) {
+                    connectionStatus = 'not_connected';
+                } else if (foundConnection.status === 'accepted') {
+                    connectionStatus = 'connected';
+                } else if (foundConnection.status === 'pending') {
+                    // Check who sent the request
+                    if (foundConnection.from === currentUserId) {
+                        connectionStatus = 'pending_sent';
+                    } else {
+                        connectionStatus = 'pending_received';
+                    }
+                } else {
+                    connectionStatus = 'not_connected';
+                }
+                
+                console.log('Connection status:', connectionStatus);
+                
+            } catch (error) {
+                console.error('Error checking connection status:', error);
+                connectionStatus = 'not_connected';
+            }
+        }
+        
+        // ==================== UPDATE PROFILE UI ====================
+        function updateProfileUI() {
+            if (!userProfile) return;
+            
+            // Set avatar initials
+            const initials = (userProfile.fullName || 'U').split(' ')
+                .map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            document.getElementById('profileAvatar').textContent = initials;
+            
+            // Set name
+            document.getElementById('profileName').textContent = userProfile.fullName || 'User';
+            
+            // Set college and department
+            const collegeDept = `${userProfile.college || 'College'} • ${userProfile.department || 'Department'}`;
+            document.getElementById('profileCollegeDept').textContent = collegeDept;
+            
+            // Update basic information
+            document.getElementById('infoCollege').textContent = userProfile.college || 'Not specified';
+            document.getElementById('infoDepartment').textContent = userProfile.department || 'Not specified';
+            document.getElementById('infoYear').textContent = `Year ${userProfile.year || 'Not specified'}`;
+            document.getElementById('infoExperience').textContent = userProfile.experience || 'Not specified';
+            document.getElementById('infoLookingFor').textContent = userProfile.lookingFor || 'Not specified';
+            
+            // Update skills
+            const skillsContainer = document.getElementById('skillsContainer');
+            skillsContainer.innerHTML = '';
+            
+            if (userProfile.skills && userProfile.skills.length > 0) {
+                userProfile.skills.forEach(skill => {
+                    const skillBadge = document.createElement('span');
+                    skillBadge.className = 'skill-badge';
+                    skillBadge.textContent = skill;
+                    skillsContainer.appendChild(skillBadge);
+                });
+            } else {
+                skillsContainer.innerHTML = '<p class="text-muted">No skills listed</p>';
+            }
+            
+            // Update interests
+            const interestsText = document.getElementById('interestsText');
+            interestsText.textContent = userProfile.interests || 'No interests listed';
+            
+            // Update connection status badge
+            updateConnectionBadge();
+            
+            // Update action buttons
+            updateActionButtons();
+            
+            // Show contact info if connected
+            if (connectionStatus === 'connected') {
+                document.getElementById('contactSection').style.display = 'block';
+                document.getElementById('contactEmail').textContent = userProfile.email || 'Not available';
+                document.getElementById('contactPhone').textContent = userProfile.phone || 'Not available';
+            }
+        }
+        
+        // ==================== UPDATE CONNECTION BADGE ====================
+        function updateConnectionBadge() {
+            const badgeContainer = document.getElementById('connectionStatusBadge');
+            
+            let badgeHtml = '';
+            let badgeClass = '';
+            
+            switch(connectionStatus) {
+                case 'connected':
+                    badgeHtml = `<i class="fas fa-check-circle me-1"></i> Connected`;
+                    badgeClass = 'badge-connected';
+                    break;
+                case 'pending_sent':
+                    badgeHtml = `<i class="fas fa-clock me-1"></i> Request Sent`;
+                    badgeClass = 'badge-pending';
+                    break;
+                case 'pending_received':
+                    badgeHtml = `<i class="fas fa-inbox me-1"></i> Request Received`;
+                    badgeClass = 'badge-pending';
+                    break;
+                default:
+                    badgeHtml = `<i class="fas fa-user-plus me-1"></i> Not Connected`;
+                    badgeClass = 'badge-not-connected';
+            }
+            
+            badgeContainer.innerHTML = `
+                <span class="connection-badge ${badgeClass}">
+                    ${badgeHtml}
+                </span>
+            `;
+        }
+        
+        // ==================== UPDATE ACTION BUTTONS ====================
+        function updateActionButtons() {
+            const buttonsContainer = document.getElementById('actionButtons');
+            buttonsContainer.innerHTML = '';
+            
+            // Back button (always shown)
+            const backBtn = document.createElement('button');
+            backBtn.className = 'btn btn-outline-secondary';
+            backBtn.innerHTML = `<i class="fas fa-arrow-left me-2"></i>Back`;
+            backBtn.onclick = goBack;
+            buttonsContainer.appendChild(backBtn);
+            
+            // Connection-specific buttons
+            switch(connectionStatus) {
+                case 'not_connected':
+                    const connectBtn = document.createElement('button');
+                    connectBtn.className = 'btn btn-primary';
+                    connectBtn.innerHTML = `<i class="fas fa-user-plus me-2"></i>Connect`;
+                    connectBtn.onclick = () => connectionModal.show();
+                    buttonsContainer.appendChild(connectBtn);
+                    break;
+                    
+                case 'pending_sent':
+                    const pendingBtn = document.createElement('button');
+                    pendingBtn.className = 'btn btn-warning';
+                    pendingBtn.innerHTML = `<i class="fas fa-clock me-2"></i>Request Sent`;
+                    pendingBtn.disabled = true;
+                    buttonsContainer.appendChild(pendingBtn);
+                    break;
+                    
+                case 'pending_received':
+                    const acceptBtn = document.createElement('button');
+                    acceptBtn.className = 'btn btn-success';
+                    acceptBtn.innerHTML = `<i class="fas fa-check me-2"></i>Accept Request`;
+                    acceptBtn.onclick = acceptConnectionRequest;
+                    buttonsContainer.appendChild(acceptBtn);
+                    
+                    const rejectBtn = document.createElement('button');
+                    rejectBtn.className = 'btn btn-outline-danger';
+                    rejectBtn.innerHTML = `<i class="fas fa-times me-2"></i>Reject`;
+                    rejectBtn.onclick = rejectConnectionRequest;
+                    buttonsContainer.appendChild(rejectBtn);
+                    break;
+                    
+                case 'connected':
+                    const chatBtn = document.createElement('button');
+                    chatBtn.className = 'btn btn-primary';
+                    chatBtn.innerHTML = `<i class="fas fa-comment me-2"></i>Message`;
+                    chatBtn.onclick = startChat;
+                    buttonsContainer.appendChild(chatBtn);
+                    
+                    const exploreBtn = document.createElement('a');
+                    exploreBtn.className = 'btn btn-outline-primary';
+                    exploreBtn.innerHTML = `<i class="fas fa-search me-2"></i>Find Teammates`;
+                    exploreBtn.href = '../explore/index.html';
+                    buttonsContainer.appendChild(exploreBtn);
+                    break;
+            }
+        }
+        
+        // ==================== CONNECTION FUNCTIONS ====================
+        async function sendConnectionRequest() {
+            try {
+                const message = document.getElementById('connectionMessage').value || 'Hi! I would like to connect with you.';
+                
+                // Check if request already exists
+                const existingQuery = query(
+                    collection(db, "connections"),
+                    where("from", "==", currentUserId),
+                    where("to", "==", viewingUserId),
+                    where("status", "==", "pending")
+                );
+                
+                const existingSnapshot = await getDocs(existingQuery);
+                if (!existingSnapshot.empty) {
+                    showNotification('You already sent a request to this user!');
+                    connectionModal.hide();
+                    return;
+                }
+                
+                // Add connection request
+                await addDoc(collection(db, "connections"), {
+                    from: currentUserId,
+                    to: viewingUserId,
+                    message: message,
+                    status: 'pending',
+                    timestamp: serverTimestamp()
+                });
+                
+                // Update UI
+                connectionStatus = 'pending_sent';
+                updateConnectionBadge();
+                updateActionButtons();
+                
+                connectionModal.hide();
+                showNotification('Connection request sent successfully!');
+                
+            } catch (error) {
+                console.error('Error sending connection request:', error);
+                showNotification('Failed to send request');
+            }
+        }
+        
+        async function acceptConnectionRequest() {
+            try {
+                // Find the pending request
+                const pendingQuery = query(
+                    collection(db, "connections"),
+                    where("from", "==", viewingUserId),
+                    where("to", "==", currentUserId),
+                    where("status", "==", "pending")
+                );
+                
+                const snapshot = await getDocs(pendingQuery);
+                
+                if (!snapshot.empty) {
+                    // Update the first pending request to accepted
+                    const requestDoc = snapshot.docs[0];
+                    await updateDoc(doc(db, "connections", requestDoc.id), {
+                        status: 'accepted',
+                        respondedAt: serverTimestamp()
+                    });
+                    
+                    // Update UI
+                    connectionStatus = 'connected';
+                    updateConnectionBadge();
+                    updateActionButtons();
+                    
+                    // Show contact section
+                    document.getElementById('contactSection').style.display = 'block';
+                    document.getElementById('contactEmail').textContent = userProfile.email || 'Not available';
+                    document.getElementById('contactPhone').textContent = userProfile.phone || 'Not available';
+                    
+                    showNotification('Connection request accepted!');
+                }
+            } catch (error) {
+                console.error('Error accepting request:', error);
+                showNotification('Failed to accept request');
+            }
+        }
+        
+        async function rejectConnectionRequest() {
+            if (!confirm('Are you sure you want to reject this connection request?')) return;
+            
+            try {
+                // Find the pending request
+                const pendingQuery = query(
+                    collection(db, "connections"),
+                    where("from", "==", viewingUserId),
+                    where("to", "==", currentUserId),
+                    where("status", "==", "pending")
+                );
+                
+                const snapshot = await getDocs(pendingQuery);
+                
+                if (!snapshot.empty) {
+                    // Update to rejected
+                    const requestDoc = snapshot.docs[0];
+                    await updateDoc(doc(db, "connections", requestDoc.id), {
+                        status: 'rejected',
+                        respondedAt: serverTimestamp()
+                    });
+                    
+                    // Update UI
+                    connectionStatus = 'not_connected';
+                    updateConnectionBadge();
+                    updateActionButtons();
+                    
+                    showNotification('Connection request rejected');
+                }
+            } catch (error) {
+                console.error('Error rejecting request:', error);
+                showNotification('Failed to reject request');
+            }
+        }
+        
+        // ==================== OTHER FUNCTIONS ====================
+        function startChat() {
+            if (connectionStatus === 'connected') {
+                // Save viewing user ID and redirect to chat
+                localStorage.setItem('selectedChatUserId', viewingUserId);
+                window.location.href = '../chat/index.html';
+            }
+        }
+        
+        function goBack() {
+            if (document.referrer && document.referrer.includes(window.location.hostname)) {
+                window.history.back();
+            } else {
+                window.location.href = '../explore/index.html';
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            console.error('Error:', message);
+        }
+        
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'position-fixed bottom-0 end-0 m-3 alert alert-success alert-dismissible fade show';
+            notification.style.zIndex = '9999';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // ==================== GLOBAL FUNCTIONS ====================
+        window.sendConnectionRequest = sendConnectionRequest;
+        window.acceptConnectionRequest = acceptConnectionRequest;
+        window.rejectConnectionRequest = rejectConnectionRequest;
+        window.startChat = startChat;
+        window.goBack = goBack;
+    </script>
+</body>
+</html>

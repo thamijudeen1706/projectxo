@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProjectXO - Find Hackathon Teams & Exchange Skills</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="icon" type="image/png" href="/assets/logo.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+
+  <meta name="description" content="ProjectXO helps students team up for hackathons, projects and events.">
+  <meta name="keywords" content="hackathon, teammates, skills exchange, student collaboration, ProjectXO">
+  <meta name="author" content="Thamijudeen M, Nanditha S">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:title" content="ProjectXO – Team up for hackathons & projects">
+  <meta property="og:description" content="Find teammates, exchange skills, collaborate on events — Built by students for students.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://iili.io/fUxLsgp.md.png">
+  <meta property="og:site_name" content="ProjectXO">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ProjectXO – Team up for hackathons & projects">
+  <meta name="twitter:description" content="Find teammates, exchange skills, collaborate on events.">
+  <meta name="twitter:image" content="https://iili.io/fUxLsgp.md.png">    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --success: #2a9d8f;
+            --warning: #e9c46a;
+            --danger: #e63946;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            width: 250px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            margin: 5px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            border: none;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .user-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+            transition: all 0.3s;
+        }
+        
+        .user-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.1);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            
+            .sidebar.active {
+                margin-left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .contact-icon-small {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="p-4">
+            <!-- Logo -->
+            <div class="d-flex align-items-center mb-5">
+                <i class="fas fa-users fa-2x me-2"></i>
+                <h4 class="fw-bold mb-0">ProjectXO</h4>
+            </div>
+            
+            <!-- User Info -->
+            <div class="text-center mb-4">
+                <div class="position-relative d-inline-block mb-3">
+                    <div class="user-avatar mx-auto" id="userAvatar">
+                        <!-- Avatar initials will be set by JS -->
+                    </div>
+                    <div class="position-absolute bottom-0 end-0 bg-success rounded-circle" 
+                         style="width: 15px; height: 15px; border: 2px solid white;"></div>
+                </div>
+                <h5 id="userName">Loading...</h5>
+                <small class="text-white-50" id="userCollege">College • Department</small>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="nav flex-column">
+                <a href="dashboard.html" class="nav-link active">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="profile/edit.html" class="nav-link">
+                    <i class="fas fa-user-edit"></i> My Profile
+                </a>
+                <a href="explore/index.html" class="nav-link">
+                    <i class="fas fa-search"></i> Find Students
+                    </span>
+                </a>
+                <a href="explore/requests.html" class="nav-link" >
+                    <i class="fas fa-handshake"></i> Requests
+                    </span>
+                </a>
+                <a href="chat/index.html" class="nav-link">
+                    <i class="fas fa-comments"></i> Messages
+                    </span>
+                </a>
+                <a href="events/index.html" class="nav-link">
+                    <i class="fas fa-calendar-alt"></i> Free Hackathons
+                </a>
+                
+            </nav>
+            
+            <!-- Logout -->
+            <div class="mt-5 pt-4 border-top border-white-10">
+                <button class="btn btn-outline-light w-100" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0" id="greeting">Welcome back!</h2>
+                <p class="text-muted mb-0">Here's what's happening with your account today.</p>
+            </div>
+            <div class="d-flex gap-3">
+                <!-- Search -->
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" class="form-control" placeholder="Search students, events..." id="searchInput">
+                    <button class="btn btn-primary" onclick="search()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <!-- Mobile Menu Toggle -->
+                <button class="btn btn-outline-primary d-md-none" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" id="connectionsCount">0</h3>
+                            <p class="text-muted mb-0">Connections</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" id="requestsCount">0</h3>
+                            <p class="text-muted mb-0">Pending Requests</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" id="eventsCount">0</h3>
+                            <p class="text-muted mb-0">Upcoming Events</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" id="messagesCount">0</h3>
+                            <p class="text-muted mb-0">Unread Messages</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="stat-card">
+                    <h5 class="fw-bold mb-3">Quick Actions</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="explore/index.html" class="btn btn-outline-primary w-100 py-3" >
+                                <i class="fas fa-search fa-lg mb-2"></i><br>
+                                Find Teammates
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="chat/index.html" class="btn btn-outline-success w-100 py-3" >
+                                <i class="fas fa-comment fa-lg mb-2"></i><br>
+                                Send Message
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="events/admin.html" class="btn btn-outline-warning w-100 py-3" >
+                                <i class="fas fa-plus fa-lg mb-2"></i><br>
+                                Create Event
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="profile/edit.html" class="btn btn-outline-info w-100 py-3">
+                                <i class="fas fa-edit fa-lg mb-2"></i><br>
+                                Update Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity & Suggested Users -->
+        <div class="row">
+            <!-- Recent Activity -->
+            <div class="col-lg-8">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Recent Activity</h5>
+                        <a href="explore/requests.html" class="text-decoration-none" >View All Requests</a>
+                    </div>
+                    
+                    <div class="activity-list" id="activityList">
+                        <!-- Activities will be loaded by JS -->
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading activities...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Suggested Users -->
+            <div class="col-lg-4">
+                <div class="stat-card">
+                    <h5 class="fw-bold mb-3">Suggested for You</h5>
+                    
+                    <div id="suggestedUsers">
+                        <!-- Suggested users will be loaded by JS -->
+                        <div class="text-center py-3">
+                            <p class="text-muted">Complete your profile to get suggestions</p>
+                            <a href="profile/edit.html" class="btn btn-sm btn-primary">Complete Profile</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Events -->
+                <div class="stat-card mt-4">
+                    <h5 class="fw-bold mb-3">Upcoming Hackathons</h5>
+                    <div class="list-group list-group-flush" id="upcomingEvents">
+                        <div class="list-group-item border-0 px-0 py-3">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">GDG TechSprint 2026</h6>
+                                <small>Jan 19</small>
+                            </div>
+                            <small class="text-muted">Google Developer Groups • ₹50,000 Prize</small>
+                        </div>
+                        <div class="list-group-item border-0 px-0 py-3">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">CodeFest 2025</h6>
+                                <small>Jan 28</small>
+                            </div>
+                            <small class="text-muted">National Level • Team of 3</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coming Soon Modal -->
+    <div class="modal fade" id="comingSoonModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-rocket me-2"></i>Feature Coming Soon!
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-cogs fa-4x text-primary"></i>
+                    </div>
+                    <h4>Working on It!</h4>
+                    <p class="text-muted">
+                        This feature is currently under development. 
+                        <br>We're working hard to bring it to you soon!
+                    </p>
+                    <div class="progress mt-4">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 75%"></div>
+                    </div>
+                    <small class="text-muted d-block mt-2">75% complete</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="showComingSoon()">
+                        <i class="fas fa-bell me-1"></i> Notify Me
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & Custom JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+<script type="module">
+    console.log('🚀 Dashboard loading...');
+    
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getFirestore, collection, getDocs, query, where, 
+        doc, getDoc, orderBy, limit, Timestamp 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
+    // Firebase config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAxv3yZ5Ex_JavuAxOEe0DoaDwH1YIx62w",
+        authDomain: "projectxo-17061130.firebaseapp.com",
+        projectId: "projectxo-17061130",
+        storageBucket: "projectxo-17061130.firebasestorage.app",
+        messagingSenderId: "834793800310",
+        appId: "1:834793800310:web:4f29a5df2cdfc148861557"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    console.log('✅ Firebase initialized');
+    
+    let comingSoonModal = null;
+    let currentUser = null;
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', async function() {
+        comingSoonModal = new bootstrap.Modal(document.getElementById('comingSoonModal'));
+        
+        // Check authentication
+        if (!checkAuth()) return;
+        
+        // Load REAL user data from Firestore
+        await loadRealUserData();
+        
+        // Load dashboard stats
+        await loadDashboardStats();
+        
+        // Load recent activities
+        await loadRecentActivities();
+        
+        // Load suggested users
+        await loadSuggestedUsers();
+        
+        // Load upcoming events
+        await loadUpcomingEvents();
+        
+        // Sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+        
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                search();
+            }
+        });
+    });
+
+    // Check authentication
+    function checkAuth() {
+        const userId = localStorage.getItem('currentUserId');
+        if (!userId) {
+            console.log('❌ No user logged in, redirecting...');
+            window.location.href = '../auth/login.html';
+            return false;
+        }
+        console.log('✅ User authenticated:', userId);
+        return true;
+    }
+
+    // Load REAL user data from Firestore
+    async function loadRealUserData() {
+        try {
+            const userId = localStorage.getItem('currentUserId');
+            console.log('📥 Loading profile for user:', userId);
+            
+            // Get user profile from Firestore
+            const userDocRef = doc(db, "users", userId);
+            const userDoc = await getDoc(userDocRef);
+            
+            if (userDoc.exists()) {
+                currentUser = userDoc.data();
+                console.log('✅ Profile loaded:', currentUser);
+                
+                // Update sidebar user info
+                document.getElementById('userName').textContent = currentUser.fullName || 'User';
+                document.getElementById('userCollege').textContent = 
+                    `${currentUser.college || 'College'} • ${currentUser.department || 'Dept'}`;
+                
+                // Set avatar initials
+                const initials = (currentUser.fullName || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                document.getElementById('userAvatar').textContent = initials;
+                
+                // Set greeting
+                const hour = new Date().getHours();
+                let greeting = 'Good morning';
+                if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
+                else if (hour >= 17) greeting = 'Good evening';
+                
+                const firstName = currentUser.fullName?.split(' ')[0] || 'User';
+                document.getElementById('greeting').textContent = `${greeting}, ${firstName}!`;
+                
+                // Save to localStorage
+                localStorage.setItem('profile', JSON.stringify(currentUser));
+                
+            } else {
+                console.log('⚠️ No profile found, redirecting to profile creation...');
+                window.location.href = 'profile/edit.html';
+            }
+            
+        } catch (error) {
+            console.error('❌ Error loading user data:', error);
+            showNotification('Error loading profile: ' + error.message);
+        }
+    }
+
+    // Load dashboard stats (real counts from Firestore)
+    async function loadDashboardStats() {
+        try {
+            const userId = localStorage.getItem('currentUserId');
+            
+            // Count ACCEPTED connections
+            const connectionsQuery = query(
+                collection(db, "connections"),
+                where("status", "==", "accepted")
+            );
+            const connectionsSnapshot = await getDocs(connectionsQuery);
+            
+            let myConnections = 0;
+            const connectedUserIds = new Set();
+            
+            connectionsSnapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.from === userId || data.to === userId) {
+                    const otherUserId = data.from === userId ? data.to : data.from;
+                    if (!connectedUserIds.has(otherUserId)) {
+                        connectedUserIds.add(otherUserId);
+                        myConnections++;
+                    }
+                }
+            });
+            
+            // Count pending requests TO me
+            const requestsQuery = query(
+                collection(db, "connections"),
+                where("to", "==", userId),
+                where("status", "==", "pending")
+            );
+            const requestsSnapshot = await getDocs(requestsQuery);
+            const pendingRequests = requestsSnapshot.size;
+            
+            // Count upcoming events (from events collection or static)
+            const eventsCount = 2; // Static for now
+            
+            // Count unread messages (from chat)
+            const unreadMessages = 0; // Will implement later
+            
+            // Update UI
+            document.getElementById('connectionsCount').textContent = myConnections;
+            document.getElementById('requestsCount').textContent = pendingRequests;
+            document.getElementById('eventsCount').textContent = eventsCount;
+            document.getElementById('messagesCount').textContent = unreadMessages;
+            
+            console.log(`📊 Stats: ${myConnections} connections, ${pendingRequests} requests`);
+            
+        } catch (error) {
+            console.error('❌ Error loading stats:', error);
+            // Set default values if error
+            document.getElementById('connectionsCount').textContent = '0';
+            document.getElementById('requestsCount').textContent = '0';
+            document.getElementById('eventsCount').textContent = '2';
+            document.getElementById('messagesCount').textContent = '0';
+        }
+    }
+// DASHBOARD.HTML - REPLACE these 3 functions
+// This version gets ONLY REAL activities, NO dummy data, NO index errors!
+
+// Load recent activities from Firestore - REAL DATA ONLY
+async function loadRecentActivities() {
+    try {
+        const userId = localStorage.getItem('currentUserId');
+        const activityList = document.getElementById('activityList');
+        
+        // Show loading
+        activityList.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary"></div>
+                <p class="mt-2 text-muted">Loading activities...</p>
+            </div>
+        `;
+        
+        console.log('📥 Loading activities...');
+        
+        // Get ALL connections WITHOUT complex query (avoids index requirement)
+        const connectionsRef = collection(db, "connections");
+        const snapshot = await getDocs(connectionsRef);
+        
+        console.log(`Found ${snapshot.size} total connections in database`);
+        
+        const activities = [];
+        const userPromises = [];
+        
+        // Process each connection
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            
+            // Only process MY connections
+            if (data.from === userId || data.to === userId) {
+                const isFromMe = data.from === userId;
+                const otherUserId = isFromMe ? data.to : data.from;
+                
+                // Get other user's data
+                const promise = getDoc(doc(db, "users", otherUserId))
+                    .then(userDoc => {
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data();
+                            return {
+                                id: docSnap.id,
+                                type: isFromMe ? 'sent_request' : 'received_request',
+                                user: userData.fullName || 'User',
+                                status: data.status || 'pending',
+                                timestamp: data.timestamp?.toDate() || new Date(),
+                                message: data.message || ''
+                            };
+                        }
+                        return null;
+                    })
+                    .catch(err => {
+                        console.error('Error loading user:', err);
+                        return null;
+                    });
+                
+                userPromises.push(promise);
+            }
+        });
+        
+        // Wait for all user data
+        const results = await Promise.all(userPromises);
+        
+        // Add valid activities
+        results.forEach(activity => {
+            if (activity) {
+                activities.push(activity);
+            }
+        });
+        
+        console.log(`✅ Loaded ${activities.length} activities`);
+        
+        // Sort by timestamp (newest first)
+        activities.sort((a, b) => {
+            const timeA = a.timestamp ? a.timestamp.getTime() : 0;
+            const timeB = b.timestamp ? b.timestamp.getTime() : 0;
+            return timeB - timeA;
+        });
+        
+        // Display activities
+        if (activities.length === 0) {
+            activityList.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">No Recent Activity</h6>
+                    <p class="text-muted small">Connect with students to see activity here</p>
+                    <a href="explore/index.html" class="btn btn-sm btn-primary mt-2">
+                        <i class="fas fa-search me-1"></i> Find Students
+                    </a>
+                </div>
+            `;
+        } else {
+            displayActivities(activities.slice(0, 5));
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading activities:', error);
+        
+        const activityList = document.getElementById('activityList');
+        activityList.innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+                <p class="text-muted">Unable to load activities</p>
+                <button class="btn btn-sm btn-outline-primary" onclick="loadRecentActivities()">
+                    <i class="fas fa-redo me-1"></i> Retry
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Display activities
+function displayActivities(activities) {
+    const activityList = document.getElementById('activityList');
+    activityList.innerHTML = '';
+    
+    if (!activities || activities.length === 0) {
+        activityList.innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No recent activity</p>
+            </div>
+        `;
+        return;
+    }
+    
+    activities.forEach(activity => {
+        const activityItem = createActivityItem(activity);
+        activityList.appendChild(activityItem);
+    });
+}
+
+// Create activity item
+function createActivityItem(activity) {
+    const div = document.createElement('div');
+    div.className = 'd-flex align-items-start mb-3 p-3 bg-light rounded-3 border';
+    div.style.transition = 'all 0.2s';
+    
+    let iconClass = '';
+    let iconColor = '';
+    let message = '';
+    let badge = '';
+    const timeAgo = formatTimeAgo(activity.timestamp);
+    
+    switch(activity.type) {
+        case 'sent_request':
+            iconClass = 'fa-paper-plane';
+            iconColor = 'primary';
+            message = `You sent a connection request to <strong>${activity.user}</strong>`;
+            
+            if (activity.status === 'accepted') {
+                badge = '<span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i>Accepted</span>';
+            } else if (activity.status === 'pending') {
+                badge = '<span class="badge bg-warning ms-2"><i class="fas fa-clock me-1"></i>Pending</span>';
+            } else if (activity.status === 'rejected') {
+                badge = '<span class="badge bg-secondary ms-2"><i class="fas fa-times me-1"></i>Declined</span>';
+            }
+            break;
+            
+        case 'received_request':
+            iconClass = 'fa-user-plus';
+            iconColor = 'success';
+            message = `<strong>${activity.user}</strong> sent you a connection request`;
+            
+            if (activity.message && activity.message.length > 0) {
+                const shortMsg = activity.message.length > 70 ? 
+                    activity.message.substring(0, 70) + '...' : 
+                    activity.message;
+                message += `<br><small class="text-muted fst-italic mt-1 d-block">"${shortMsg}"</small>`;
+            }
+            
+            if (activity.status === 'pending') {
+                badge = `
+                    <div class="mt-2">
+                        <a href="explore/requests.html" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye me-1"></i> View Request
+                        </a>
+                    </div>
+                `;
+            } else if (activity.status === 'accepted') {
+                badge = '<span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i>Connected</span>';
+            }
+            break;
+            
+        default:
+            iconClass = 'fa-bell';
+            iconColor = 'info';
+            message = activity.message || 'New activity';
+    }
+    
+    div.innerHTML = `
+        <div class="flex-shrink-0">
+            <div class="rounded-circle bg-${iconColor} bg-opacity-10 text-${iconColor} d-flex align-items-center justify-content-center" 
+                 style="width: 45px; height: 45px;">
+                <i class="fas ${iconClass}"></i>
+            </div>
+        </div>
+        <div class="flex-grow-1 ms-3">
+            <div class="mb-1">
+                ${message}
+                ${badge && !badge.includes('mt-2') ? badge : ''}
+            </div>
+            <small class="text-muted">
+                <i class="fas fa-clock me-1"></i>${timeAgo}
+            </small>
+            ${badge && badge.includes('mt-2') ? badge : ''}
+        </div>
+    `;
+    
+    // Hover effect
+    div.addEventListener('mouseenter', function() {
+        this.style.borderColor = '#4361ee';
+        this.style.boxShadow = '0 2px 8px rgba(67,97,238,0.15)';
+    });
+    
+    div.addEventListener('mouseleave', function() {
+        this.style.borderColor = '';
+        this.style.boxShadow = '';
+    });
+    
+    return div;
+}    // Load suggested users from Firestore
+    async function loadSuggestedUsers() {
+        try {
+            const userId = localStorage.getItem('currentUserId');
+            const suggestedUsersContainer = document.getElementById('suggestedUsers');
+            
+            // Clear loading state
+            suggestedUsersContainer.innerHTML = '<div class="text-center"><div class="spinner-border text-primary"></div></div>';
+            
+            // Get all users except current user
+            const usersSnapshot = await getDocs(collection(db, "users"));
+            const allUsers = [];
+            
+            usersSnapshot.forEach(doc => {
+                if (doc.id !== userId) {
+                    allUsers.push({ id: doc.id, ...doc.data() });
+                }
+            });
+            
+            console.log(`👥 Found ${allUsers.length} other users`);
+            
+            if (allUsers.length === 0) {
+                suggestedUsersContainer.innerHTML = `
+                    <div class="text-center py-3">
+                        <p class="text-muted">No other users yet. Be the first to invite friends!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Filter: Get users with similar skills or department
+            const currentUserSkills = currentUser?.skills || [];
+            const currentUserDept = currentUser?.department || '';
+            
+            const suggestedUsers = allUsers.filter(user => {
+                // If user has skills, check for similarity
+                if (user.skills && currentUserSkills.length > 0) {
+                    const commonSkills = user.skills.filter(skill => 
+                        currentUserSkills.includes(skill)
+                    );
+                    if (commonSkills.length > 0) return true;
+                }
+                
+                // Same department
+                if (user.department === currentUserDept) return true;
+                
+                return false;
+            });
+            
+            // If no similar users, show random users
+            const usersToShow = suggestedUsers.length > 0 ? suggestedUsers : allUsers;
+            
+            // Show first 3 users
+            suggestedUsersContainer.innerHTML = '';
+            usersToShow.slice(0, 3).forEach(user => {
+                const userCard = createSuggestedUserCard(user);
+                suggestedUsersContainer.appendChild(userCard);
+            });
+            
+        } catch (error) {
+            console.error('❌ Error loading suggested users:', error);
+            document.getElementById('suggestedUsers').innerHTML = `
+                <div class="text-center py-3">
+                    <p class="text-muted">Error loading suggestions</p>
+                </div>
+            `;
+        }
+    }
+
+    // Create suggested user card
+    function createSuggestedUserCard(user) {
+        const div = document.createElement('div');
+        div.className = 'user-card';
+        
+        const initials = (user.fullName || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        
+        // Get badge color based on lookingFor
+        let badgeClass = 'bg-primary';
+        if (user.lookingFor === 'Skill Exchange') badgeClass = 'bg-success';
+        else if (user.lookingFor === 'Both') badgeClass = 'bg-warning';
+        
+        div.innerHTML = `
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                         style="width: 50px; height: 50px; font-weight: bold;">
+                        ${initials}
+                    </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h6 class="fw-bold mb-0">${user.fullName || 'User'}</h6>
+                    <small class="text-muted d-block">${user.college || 'College'} • ${user.department || 'Dept'}</small>
+                    <div class="d-flex gap-1 mt-1">
+                        <span class="badge ${badgeClass}">${user.lookingFor || 'Looking for team'}</span>
+                        ${user.skills && user.skills.length > 0 ? `<span class="badge bg-light text-dark">${user.skills[0]}</span>` : ''}
+                    </div>
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewSuggestedUser('${user.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        return div;
+    }
+
+    // Load upcoming events
+    async function loadUpcomingEvents() {
+        try {
+            // For now, use static data
+            // In future, can load from Firestore events collection
+            const events = [
+                {
+                    title: 'GDG TechSprint 2026',
+                    date: 'Jan 19',
+                    description: 'Google Developer Groups • ₹50,000 Prize'
+                },
+                {
+                    title: 'CodeFest 2025',
+                    date: 'Jan 28',
+                    description: 'National Level • Team of 3'
+                },
+                {
+                    title: 'AI for Good Challenge',
+                    date: 'Jan 31',
+                    description: 'Hack2Skill • Free Registration'
+                }
+            ];
+            
+            const eventsContainer = document.getElementById('upcomingEvents');
+            eventsContainer.innerHTML = '';
+            
+            events.forEach(event => {
+                const eventItem = document.createElement('div');
+                eventItem.className = 'list-group-item border-0 px-0 py-3';
+                eventItem.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${event.title}</h6>
+                        <small>${event.date}</small>
+                    </div>
+                    <small class="text-muted">${event.description}</small>
+                `;
+                eventsContainer.appendChild(eventItem);
+            });
+            
+        } catch (error) {
+            console.error('❌ Error loading events:', error);
+        }
+    }
+
+    // Helper functions
+    function formatTimeAgo(date) {
+        if (!date) return 'Recently';
+        
+        const seconds = Math.floor((new Date() - date) / 1000);
+        
+        if (seconds < 60) return 'Just now';
+        
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `${days}d ago`;
+        
+        const weeks = Math.floor(days / 7);
+        if (weeks < 4) return `${weeks}w ago`;
+        
+        return date.toLocaleDateString();
+    }
+
+    // View suggested user profile
+    window.viewSuggestedUser = function(userId) {
+        localStorage.setItem('selectedUserId', userId);
+        window.location.href = 'profile/view.html';
+    };
+
+    // Search function
+    window.search = function() {
+        const query = document.getElementById('searchInput').value;
+        if (query.trim()) {
+            window.location.href = `explore/index.html?search=${encodeURIComponent(query)}`;
+        }
+    };
+
+    // Show coming soon modal
+    window.showComingSoon = function() {
+        if (comingSoonModal) {
+            comingSoonModal.show();
+        }
+    };
+
+    // Show notification
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'position-fixed bottom-0 end-0 m-3 alert alert-info alert-dismissible fade show';
+        notification.style.zIndex = '9999';
+        notification.innerHTML = `
+            <i class="fas fa-info-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Logout function
+    window.logout = function() {
+        localStorage.clear();
+        window.location.href = 'auth/login.html';
+    };
+    
+    console.log('✅ Dashboard script loaded');
+</script></body>
+</html>

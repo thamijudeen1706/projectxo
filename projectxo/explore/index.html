@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProjectXO - Find Hackathon Teams & Exchange Skills</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="icon" type="image/png" href="/assets/logo.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+
+  <meta name="description" content="ProjectXO helps students team up for hackathons, projects and events.">
+  <meta name="keywords" content="hackathon, teammates, skills exchange, student collaboration, ProjectXO">
+  <meta name="author" content="Thamijudeen M, Nanditha S">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:title" content="ProjectXO – Team up for hackathons & projects">
+  <meta property="og:description" content="Find teammates, exchange skills, collaborate on events — Built by students for students.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://iili.io/fUxLsgp.md.png">
+  <meta property="og:site_name" content="ProjectXO">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ProjectXO – Team up for hackathons & projects">
+  <meta name="twitter:description" content="Find teammates, exchange skills, collaborate on events.">
+  <meta name="twitter:image" content="https://iili.io/fUxLsgp.md.png">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            width: 250px;
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            margin: 5px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .user-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            border: 1px solid #eee;
+        }
+        
+        .user-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.15);
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, #4cc9f0 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .badge-skill {
+            background: #e9ecef;
+            color: #495057;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 2px;
+        }
+        
+        .filter-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .sidebar.active {
+                margin-left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="p-4">
+            <!-- Logo -->
+            <div class="d-flex align-items-center mb-5">
+                <i class="fas fa-users fa-2x me-2"></i>
+                <h4 class="fw-bold mb-0">ProjectXO</h4>
+            </div>
+            
+            <!-- User Info -->
+            <div class="text-center mb-4">
+                <div class="position-relative d-inline-block mb-3">
+                    <div class="user-avatar mx-auto" id="userAvatarSidebar">
+                        <!-- Avatar will be set by JS -->
+                    </div>
+                </div>
+                <h5 id="userNameSidebar">User</h5>
+                <small class="text-white-50" id="userCollegeSidebar">College • Dept</small>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="nav flex-column">
+                <a href="../dashboard.html" class="nav-link">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="../profile/edit.html" class="nav-link">
+                    <i class="fas fa-user-edit"></i> My Profile
+                </a>
+                <a href="index.html" class="nav-link active">
+                    <i class="fas fa-search"></i> Find Students
+                </a>
+                <a href="requests.html" class="nav-link">
+                    <i class="fas fa-handshake"></i> Requests
+                    <span class="notification-badge" id="requestsBadge" style="display: none;"></span>
+                </a>
+                <a href="../chat/index.html" class="nav-link">
+                    <i class="fas fa-comments"></i> Messages
+                </a>
+                <a href="../events/index.html" class="nav-link">
+                    <i class="fas fa-calendar-alt"></i> Free Hackathons
+                </a>
+            </nav>
+            
+            <!-- Logout -->
+            <div class="mt-5 pt-4 border-top border-white-10">
+                <button class="btn btn-outline-light w-100" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Find Students</h2>
+                <p class="text-muted mb-0">Connect with students based on skills and interests</p>
+            </div>
+            <div class="d-flex gap-3">
+                <!-- Mobile Menu Toggle -->
+                <button class="btn btn-outline-primary d-md-none" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="filter-card">
+            <div class="row g-3">
+                <!-- Search Input -->
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="searchInput" 
+                               placeholder="Search by name, skills, college...">
+                        <button class="btn btn-primary" onclick="searchUsers()">
+                            Search
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Department Filter -->
+                <div class="col-md-3">
+                    <select class="form-select" id="departmentFilter">
+                        <option value="">All Departments</option>
+                        <option value="CSE">Computer Science</option>
+                        <option value="IT">Information Technology</option>
+                        <option value="ECE">Electronics & Comm</option>
+                        <option value="EEE">Electrical</option>
+                        <option value="MECH">Mechanical</option>
+                        <option value="CIVIL">Civil</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+                
+                <!-- Looking For Filter -->
+                <div class="col-md-3">
+                    <select class="form-select" id="lookingForFilter">
+                        <option value="">All Types</option>
+                        <option value="Hackathon Teammates">Hackathon Teammates</option>
+                        <option value="Skill Exchange">Skill Exchange</option>
+                        <option value="Both">Both</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Skill Filters -->
+            <div class="mt-3">
+                <div class="d-flex flex-wrap gap-2" id="skillFilters">
+                    <!-- Skills will be added dynamically -->
+                </div>
+            </div>
+            
+            <!-- Active Filters -->
+            <div class="mt-3" id="activeFilters" style="display: none;">
+                <small class="text-muted">Active filters:</small>
+                <div id="appliedFilters" class="d-flex flex-wrap gap-2 mt-1"></div>
+            </div>
+        </div>
+
+        <!-- Users Count -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0" id="usersCount">Loading users...</h5>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm active" onclick="changeView('grid')">
+                    <i class="fas fa-th-large"></i> Grid
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="changeView('list')">
+                    <i class="fas fa-list"></i> List
+                </button>
+            </div>
+        </div>
+
+        <!-- Users Grid -->
+        <div class="row" id="usersGrid">
+            <!-- Users will be loaded here -->
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading students...</p>
+            </div>
+        </div>
+
+        <!-- No Results -->
+        <div id="noResults" class="text-center py-5" style="display: none;">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <h4>No students found</h4>
+            <p class="text-muted">Try adjusting your search or filters</p>
+            <button class="btn btn-outline-primary" onclick="clearFilters()">
+                <i class="fas fa-times me-1"></i> Clear Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Connection Modal -->
+    <div class="modal fade" id="connectionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus me-2"></i>Send Connection Request
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <div class="user-avatar mx-auto mb-3" id="modalUserAvatar">
+                            <!-- Avatar -->
+                        </div>
+                        <h4 id="modalUserName">User Name</h4>
+                        <p class="text-muted mb-0" id="modalUserCollege">College • Department</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="connectionMessage" class="form-label">
+                            Add a message (optional):
+                        </label>
+                        <textarea class="form-control" id="connectionMessage" rows="3" 
+                                  placeholder="Hi! I saw your profile and would like to connect..."></textarea>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        They'll see your profile before accepting
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="sendConnection()">
+                        <i class="fas fa-paper-plane me-1"></i> Send Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ <script type="module">
+    console.log('🚀 Explore page loading...');
+    
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getFirestore, collection, getDocs, query, where, 
+        addDoc, serverTimestamp, doc, getDoc 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
+    // Firebase config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAxv3yZ5Ex_JavuAxOEe0DoaDwH1YIx62w",
+        authDomain: "projectxo-17061130.firebaseapp.com",
+        projectId: "projectxo-17061130",
+        storageBucket: "projectxo-17061130.firebasestorage.app",
+        messagingSenderId: "834793800310",
+        appId: "1:834793800310:web:4f29a5df2cdfc148861557"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // Global variables
+    let currentUser = null;
+    let allUsers = [];
+    let filteredUsers = [];
+    let currentView = 'grid';
+    let selectedUserId = null;
+    let connectionModal = null;
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('📱 DOM loaded');
+        
+        // Initialize modal
+        connectionModal = new bootstrap.Modal(document.getElementById('connectionModal'));
+        
+        // Check authentication
+        if (!checkAuth()) return;
+        
+        // Load current user
+        await loadCurrentUser();
+        
+        // Load all users
+        await loadAllUsersWithConnections();
+        
+        // Setup event listeners
+        setupEventListeners();
+        
+        // Mobile sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+        
+        console.log('✅ Explore page initialized');
+    });
+    
+    // Check authentication
+    function checkAuth() {
+        const userId = localStorage.getItem('currentUserId');
+        if (!userId) {
+            window.location.href = '../auth/login.html';
+            return false;
+        }
+        return true;
+    }
+    
+    // Load current user
+    async function loadCurrentUser() {
+        try {
+            const userId = localStorage.getItem('currentUserId');
+            const userDoc = await getDoc(doc(db, "users", userId));
+            
+            if (userDoc.exists()) {
+                currentUser = userDoc.data();
+                
+                // Update sidebar
+                const initials = (currentUser.fullName || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                document.getElementById('userAvatarSidebar').textContent = initials;
+                document.getElementById('userNameSidebar').textContent = currentUser.fullName || 'User';
+                document.getElementById('userCollegeSidebar').textContent = 
+                    `${currentUser.college || 'College'} • ${currentUser.department || 'Dept'}`;
+            }
+        } catch (error) {
+            console.error('Error loading current user:', error);
+        }
+    }
+    
+    // Load all users with their connection status
+    async function loadAllUsersWithConnections() {
+        try {
+            const usersContainer = document.getElementById('usersGrid');
+            usersContainer.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-2">Loading students...</p></div>';
+            
+            const currentUserId = localStorage.getItem('currentUserId');
+            
+            // Get all users
+            const usersSnapshot = await getDocs(collection(db, "users"));
+            
+            // Get all connections involving current user
+            const connectionsQuery = query(
+                collection(db, "connections"),
+                where("status", "in", ["pending", "accepted"])
+            );
+            const connectionsSnapshot = await getDocs(connectionsQuery);
+            
+            // Process connections to build status map
+            const userConnectionStatus = new Map();
+            
+            connectionsSnapshot.forEach(connDoc => {
+                const conn = connDoc.data();
+                
+                // Check if current user is involved in this connection
+                if (conn.from === currentUserId || conn.to === currentUserId) {
+                    const otherUserId = conn.from === currentUserId ? conn.to : conn.from;
+                    
+                    // Store the highest priority status (accepted > pending)
+                    if (!userConnectionStatus.has(otherUserId) || 
+                        (conn.status === 'accepted' && userConnectionStatus.get(otherUserId) !== 'accepted')) {
+                        userConnectionStatus.set(otherUserId, {
+                            status: conn.status,
+                            connectionId: connDoc.id,
+                            isIncoming: conn.to === currentUserId
+                        });
+                    }
+                }
+            });
+            
+            // Process users
+            allUsers = [];
+            usersSnapshot.forEach(userDoc => {
+                if (userDoc.id !== currentUserId) {
+                    const userData = userDoc.data();
+                    const connectionInfo = userConnectionStatus.get(userDoc.id);
+                    
+                    allUsers.push({ 
+                        id: userDoc.id, 
+                        ...userData,
+                        connectionStatus: connectionInfo ? connectionInfo.status : null,
+                        isIncomingRequest: connectionInfo ? connectionInfo.isIncoming : false
+                    });
+                }
+            });
+            
+            console.log(`✅ Loaded ${allUsers.length} users with connection status`);
+            
+            // Update count
+            document.getElementById('usersCount').textContent = `${allUsers.length} students found`;
+            
+            // Extract unique skills for filters
+            extractSkills();
+            
+            // Display users
+            filteredUsers = [...allUsers];
+            displayUsersWithStatus();
+            
+        } catch (error) {
+            console.error('❌ Error loading users:', error);
+            document.getElementById('usersGrid').innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+                    <h5>Error loading users</h5>
+                    <p class="text-muted">Please try again</p>
+                    <button class="btn btn-primary" onclick="loadAllUsersWithConnections()">
+                        <i class="fas fa-redo me-1"></i> Retry
+                    </button>
+                </div>
+            `;
+        }
+    }
+    
+    // Extract unique skills for filtering
+    function extractSkills() {
+        const skillFilters = document.getElementById('skillFilters');
+        const allSkills = new Set();
+        
+        allUsers.forEach(user => {
+            if (user.skills && Array.isArray(user.skills)) {
+                user.skills.forEach(skill => {
+                    if (skill && skill.trim()) {
+                        allSkills.add(skill.trim());
+                    }
+                });
+            }
+        });
+        
+        // Add skill buttons
+        skillFilters.innerHTML = '';
+        Array.from(allSkills).sort().slice(0, 10).forEach(skill => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-outline-secondary btn-sm';
+            button.textContent = skill;
+            button.onclick = () => toggleSkillFilter(skill);
+            skillFilters.appendChild(button);
+        });
+    }
+    
+    // Display users with connection status
+    function displayUsersWithStatus() {
+        const usersContainer = document.getElementById('usersGrid');
+        
+        if (filteredUsers.length === 0) {
+            usersContainer.style.display = 'none';
+            document.getElementById('noResults').style.display = 'block';
+            return;
+        }
+        
+        usersContainer.style.display = 'flex';
+        document.getElementById('noResults').style.display = 'none';
+        
+        usersContainer.innerHTML = '';
+        
+        filteredUsers.forEach(user => {
+            const userCard = createUserCardWithStatus(user);
+            usersContainer.appendChild(userCard);
+        });
+        
+        // Update count
+        document.getElementById('usersCount').textContent = `${filteredUsers.length} students found`;
+    }
+    
+    // Create user card with connection status
+    function createUserCardWithStatus(user) {
+        const col = document.createElement('div');
+        col.className = currentView === 'grid' ? 'col-md-6 col-lg-4' : 'col-12';
+        
+        const initials = (user.fullName || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        
+        // Get badge color based on lookingFor
+        let badgeClass = 'bg-primary';
+        if (user.lookingFor === 'Skill Exchange') badgeClass = 'bg-success';
+        else if (user.lookingFor === 'Both') badgeClass = 'bg-warning';
+        
+        // Determine button based on connection status
+        let actionButton = '';
+        
+        if (user.connectionStatus === 'accepted') {
+            // Already connected - show Message button
+            actionButton = `
+                <button class="btn btn-success" onclick="startChat('${user.id}')">
+                    <i class="fas fa-comment me-1"></i>Message
+                </button>
+            `;
+        } else if (user.connectionStatus === 'pending') {
+            if (user.isIncomingRequest) {
+                // Incoming request - show Accept button
+                actionButton = `
+                    <span class="badge bg-warning mb-2">Request Received</span>
+                    <button class="btn btn-outline-primary" onclick="viewUserProfile('${user.id}')">
+                        <i class="fas fa-eye me-1"></i>View & Respond
+                    </button>
+                `;
+            } else {
+                // Outgoing request - show Pending badge
+                actionButton = `
+                    <span class="badge bg-info">Request Sent</span>
+                    <button class="btn btn-outline-secondary btn-sm mt-2" onclick="cancelPendingRequest('${user.id}')">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                `;
+            }
+        } else {
+            // No connection - show Connect button
+            actionButton = `
+                <button class="btn btn-primary" onclick="openConnectionModal('${user.id}')">
+                    <i class="fas fa-user-plus me-1"></i>Connect
+                </button>
+            `;
+        }
+        
+        // Get first 3 skills
+        const skillsHtml = user.skills && user.skills.length > 0 
+            ? user.skills.slice(0, 3).map(skill => `<span class="badge-skill">${skill}</span>`).join('')
+            : '<small class="text-muted">No skills listed</small>';
+        
+        col.innerHTML = `
+            <div class="user-card">
+                <div class="row align-items-center">
+                    <!-- Avatar & Basic Info -->
+                    <div class="${currentView === 'grid' ? 'col-md-12' : 'col-md-2'} text-center mb-3 ${currentView === 'grid' ? 'mb-md-3' : 'mb-md-0'}">
+                        <div class="user-avatar mx-auto mb-3">
+                            ${initials}
+                        </div>
+                        <h5 class="fw-bold mb-1">${user.fullName || 'User'}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-graduation-cap me-1"></i>${user.college || 'College'}
+                        </p>
+                        <span class="badge ${badgeClass}">${user.lookingFor || 'Looking'}</span>
+                    </div>
+                    
+                    <!-- Details -->
+                    <div class="${currentView === 'grid' ? 'col-md-12' : 'col-md-7'}">
+                        <div class="mb-3">
+                            <p class="mb-1">
+                                <i class="fas fa-book me-1 text-primary"></i>
+                                ${user.department || 'Department'} • Year ${user.year || 'N/A'}
+                            </p>
+                            <p class="mb-1">
+                                <i class="fas fa-chart-line me-1 text-success"></i>
+                                ${user.experience || 'Experience not specified'}
+                            </p>
+                            ${user.interests ? `
+                                <p class="mb-1">
+                                    <i class="fas fa-heart me-1 text-danger"></i>
+                                    ${user.interests.substring(0, 50)}${user.interests.length > 50 ? '...' : ''}
+                                </p>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Skills -->
+                        <div class="mb-3">
+                            <h6 class="fw-semibold mb-2">
+                                <i class="fas fa-code me-1"></i>Skills:
+                            </h6>
+                            <div class="d-flex flex-wrap">
+                                ${skillsHtml}
+                                ${user.skills && user.skills.length > 3 ? '<span class="badge-skill">+' + (user.skills.length - 3) + ' more</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="${currentView === 'grid' ? 'col-md-12' : 'col-md-3'} text-center">
+                        <div class="d-grid gap-2">
+                            ${actionButton}
+                            <button class="btn btn-outline-primary" onclick="viewUserProfile('${user.id}')">
+                                <i class="fas fa-eye me-1"></i>View Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        return col;
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+        // Search input
+        document.getElementById('searchInput').addEventListener('input', filterUsers);
+        
+        // Filter dropdowns
+        document.getElementById('departmentFilter').addEventListener('change', filterUsers);
+        document.getElementById('lookingForFilter').addEventListener('change', filterUsers);
+    }
+    
+    // Filter users based on search and filters
+    function filterUsers() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const departmentFilter = document.getElementById('departmentFilter').value;
+        const lookingForFilter = document.getElementById('lookingForFilter').value;
+        
+        filteredUsers = allUsers.filter(user => {
+            // Search term filter
+            if (searchTerm) {
+                const matchesSearch = 
+                    (user.fullName && user.fullName.toLowerCase().includes(searchTerm)) ||
+                    (user.college && user.college.toLowerCase().includes(searchTerm)) ||
+                    (user.skills && user.skills.some(skill => skill.toLowerCase().includes(searchTerm))) ||
+                    (user.interests && user.interests.toLowerCase().includes(searchTerm));
+                
+                if (!matchesSearch) return false;
+            }
+            
+            // Department filter
+            if (departmentFilter && user.department !== departmentFilter) {
+                return false;
+            }
+            
+            // Looking for filter
+            if (lookingForFilter && user.lookingFor !== lookingForFilter) {
+                return false;
+            }
+            
+            return true;
+        });
+        
+        displayUsersWithStatus();
+        updateActiveFilters();
+    }
+    
+    // Update active filters display
+    function updateActiveFilters() {
+        const activeFilters = document.getElementById('activeFilters');
+        const appliedFilters = document.getElementById('appliedFilters');
+        const departmentFilter = document.getElementById('departmentFilter').value;
+        const lookingForFilter = document.getElementById('lookingForFilter').value;
+        const searchTerm = document.getElementById('searchInput').value;
+        
+        appliedFilters.innerHTML = '';
+        let hasFilters = false;
+        
+        if (searchTerm) {
+            hasFilters = true;
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary';
+            badge.innerHTML = `Search: ${searchTerm} <button class="btn-close btn-close-white ms-1" style="font-size: 0.5rem;" onclick="clearSearch()"></button>`;
+            appliedFilters.appendChild(badge);
+        }
+        
+        if (departmentFilter) {
+            hasFilters = true;
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-secondary';
+            badge.innerHTML = `Dept: ${departmentFilter} <button class="btn-close btn-close-white ms-1" style="font-size: 0.5rem;" onclick="clearDepartmentFilter()"></button>`;
+            appliedFilters.appendChild(badge);
+        }
+        
+        if (lookingForFilter) {
+            hasFilters = true;
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-success';
+            badge.innerHTML = `Looking for: ${lookingForFilter} <button class="btn-close btn-close-white ms-1" style="font-size: 0.5rem;" onclick="clearLookingForFilter()"></button>`;
+            appliedFilters.appendChild(badge);
+        }
+        
+        activeFilters.style.display = hasFilters ? 'block' : 'none';
+    }
+    
+    // Clear filters
+    window.clearFilters = function() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('departmentFilter').value = '';
+        document.getElementById('lookingForFilter').value = '';
+        filterUsers();
+    };
+    
+    window.clearSearch = function() {
+        document.getElementById('searchInput').value = '';
+        filterUsers();
+    };
+    
+    window.clearDepartmentFilter = function() {
+        document.getElementById('departmentFilter').value = '';
+        filterUsers();
+    };
+    
+    window.clearLookingForFilter = function() {
+        document.getElementById('lookingForFilter').value = '';
+        filterUsers();
+    };
+    
+    // Toggle skill filter
+    window.toggleSkillFilter = function(skill) {
+        // For now, add to search input
+        document.getElementById('searchInput').value = skill;
+        filterUsers();
+    };
+    
+    // Change view (grid/list)
+    window.changeView = function(view) {
+        currentView = view;
+        
+        // Update button states
+        document.querySelectorAll('.btn-group .btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Redisplay users
+        displayUsersWithStatus();
+    };
+    
+    // Search users (called from button)
+    window.searchUsers = function() {
+        filterUsers();
+    };
+    
+    // Open connection modal
+    window.openConnectionModal = async function(userId) {
+        selectedUserId = userId;
+        
+        try {
+            const userDoc = await getDoc(doc(db, "users", userId));
+            if (userDoc.exists()) {
+                const user = userDoc.data();
+                
+                // Update modal content
+                const initials = (user.fullName || 'U').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                document.getElementById('modalUserAvatar').textContent = initials;
+                document.getElementById('modalUserName').textContent = user.fullName || 'User';
+                document.getElementById('modalUserCollege').textContent = 
+                    `${user.college || 'College'} • ${user.department || 'Dept'}`;
+                
+                // Clear previous message
+                document.getElementById('connectionMessage').value = '';
+                
+                // Show modal
+                connectionModal.show();
+                
+                // Focus on message input
+                setTimeout(() => {
+                    document.getElementById('connectionMessage').focus();
+                }, 100);
+            }
+        } catch (error) {
+            console.error('Error loading user for modal:', error);
+            alert('Error loading user information');
+        }
+    };
+    
+    // Send connection request
+    window.sendConnection = async function() {
+        try {
+            const fromUserId = localStorage.getItem('currentUserId');
+            const message = document.getElementById('connectionMessage').value || 'Hi! I would like to connect with you.';
+            
+            console.log('📤 SENDING REQUEST:');
+            console.log('From:', fromUserId);
+            console.log('To:', selectedUserId);
+            
+            // 🔥 CHECK IF REQUEST ALREADY EXISTS
+            const existingQuery = query(
+                collection(db, "connections"),
+                where("from", "==", fromUserId),
+                where("to", "==", selectedUserId),
+                where("status", "==", "pending")
+            );
+            const existingSnapshot = await getDocs(existingQuery);
+            
+            if (!existingSnapshot.empty) {
+                showNotification('You already sent a request to this user!');
+                connectionModal.hide();
+                return;
+            }
+            
+            // Add to connections collection
+            await addDoc(collection(db, "connections"), {
+                from: fromUserId,
+                to: selectedUserId,
+                message: message,
+                status: 'pending',
+                timestamp: serverTimestamp()
+            });
+            
+            console.log('✅ Request sent to Firestore!');
+            
+            // Close modal
+            connectionModal.hide();
+            
+            // Reload users to update status
+            await loadAllUsersWithConnections();
+            
+            // Show success message
+            showNotification('Connection request sent successfully!');
+            
+        } catch (error) {
+            console.error('❌ Error sending connection request:', error);
+            alert('Error sending request: ' + error.message);
+        }
+    };
+    
+    // Cancel pending request
+    window.cancelPendingRequest = async function(userId) {
+        if (!confirm('Are you sure you want to cancel this request?')) return;
+        
+        try {
+            const currentUserId = localStorage.getItem('currentUserId');
+            
+            // Find the pending request
+            const pendingQuery = query(
+                collection(db, "connections"),
+                where("from", "==", currentUserId),
+                where("to", "==", userId),
+                where("status", "==", "pending")
+            );
+            
+            const snapshot = await getDocs(pendingQuery);
+            
+            if (!snapshot.empty) {
+                // In real app, you would delete or mark as cancelled
+                // For now, just show message
+                showNotification('Request cancelled (feature in development)');
+                
+                // Reload users
+                await loadAllUsersWithConnections();
+            }
+        } catch (error) {
+            console.error('Error cancelling request:', error);
+        }
+    };
+    
+    // Start chat (placeholder)
+    window.startChat = function(userId) {
+        //showNotification('Chat feature coming soon! Will be implemented next.');
+         window.location.href = `/chat/index.html?userId=${userId}`;
+    };
+    
+    // View user profile
+    window.viewUserProfile = function(userId) {
+        localStorage.setItem('selectedUserId', userId);
+        window.location.href = '../profile/view.html';
+    };
+    
+    // Logout
+    window.logout = function() {
+        localStorage.clear();
+        window.location.href = '../auth/login.html';
+    };
+    
+    // Show notification
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'position-fixed bottom-0 end-0 m-3 alert alert-info alert-dismissible fade show';
+        notification.style.zIndex = '9999';
+        notification.innerHTML = `
+            <i class="fas fa-info-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+</script>
+</body>
+</html>
